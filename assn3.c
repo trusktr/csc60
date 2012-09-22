@@ -77,13 +77,31 @@ late turn-ins.
 #include <stdint.h> // provides constant width integers (cross-platform)
 #include <stdlib.h> // sprintf()
 
-
+/*The use of a macro to eliminate some duplicate code.*/
+#define GOOD_STUFF(__maskDeclaration, __bitSetter) \
+	for (i=0; i<strlen(lastName); i++) { \
+		bit = 0; \
+		__maskDeclaration; \
+		write(1, "\n", 1); \
+		write(1, " ", 1); write(1, (char[]){lastName[i]}, 1); write(1, " ", 1); \
+		for (j=7; j>=0; j--) { \
+			bit = __bitSetter << (7-j); \
+			bit = bit >> 7; \
+			char ch[3]; /* 8 bit integers are at most 3 characters long in decimal form.*/ \
+			sprintf(ch, "%u", (int)bit); \
+			write(1, " ", 1); write(1, ch, 1); write(1, " ", 1); \
+		} \
+	} \
+	write(1, "\n", 1);
 
 
 int main(void) {
 	int i = 0;
+	int j = 0;
 	char lastName[20];
-	int length;
+	int length = 0;
+	uint8_t bit = 0; // cross-platform constant width int of 8 bits... My computer is 64bit... School's are 32 bit... My program won't work on school computer otherwise.
+	uint8_t masked;
 
 	write(1, "1. Enter your last name: ", 25 ); // prompt to enter
 	
@@ -95,67 +113,13 @@ int main(void) {
 	char firstLetter = lastName[0];
 	
 // PART 1 --------------------------------------------------
-	for (i=0; i<strlen(lastName); i++) {
-		int j=0;
-		uint8_t bit = 0; // cross-platform constant width int of 8 bits... My computer is 64bit... School's are 32 bit... My program won't work on school computer otherwise.
-		
-		write(1, "\n", 1);
-		write(1, " ", 1); write(1, (char[]){lastName[i]}, 1); write(1, " ", 1);
-		
-		for (j=7; j>=0; j--) {
-			bit = ((uint8_t)lastName[i]) << (7-j);
-			bit = bit >> 7;
-			
-			char ch[3]; // 8 bit integers are at most 3 characters long in decimal form.
-			sprintf(ch, "%u", (int)bit);
-			write(1, " ", 1); write(1, ch, 1); write(1, " ", 1);
-		}
-	}
-	write(1, "\n", 1);
+	GOOD_STUFF( masked = 0, ((uint8_t)lastName[i]) )
 	
 // PART 2 --------------------------------------------------
-	for (i=0; i<strlen(lastName); i++) {
-		int j=0;
-		uint8_t bit = 0; // cross-platform constant width int of 8 bits... My computer is 64bit... School's are 32 bit... My program won't work on school computer otherwise.
-		uint8_t masked = 0;
-		
-		write(1, "\n", 1);
-		write(1, " ", 1); write(1, (char[]){lastName[i]}, 1); write(1, " ", 1);
-		
-		masked = ((uint8_t)firstLetter) | ((uint8_t)lastName[i]);
-		
-		for (j=7; j>=0; j--) {
-			bit = masked << (7-j);
-			bit = bit >> 7;
-			
-			char ch[3]; // 8 bit integers are at most 3 characters long in decimal form.
-			sprintf(ch, "%u", (int)bit);
-			write(1, " ", 1); write(1, ch, 1); write(1, " ", 1);
-		}
-	}
-	write(1, "\n", 1);
+	GOOD_STUFF( masked = ((uint8_t)firstLetter) | ((uint8_t)lastName[i]), masked )
 	
 // PART 3 --------------------------------------------------
-	for (i=0; i<strlen(lastName); i++) {
-		int j=0;
-		uint8_t bit = 0; // cross-platform constant width int of 8 bits... My computer is 64bit... School's are 32 bit... My program won't work on school computer otherwise.
-		uint8_t masked = 0;
-		
-		write(1, "\n", 1);
-		write(1, " ", 1); write(1, (char[]){lastName[i]}, 1); write(1, " ", 1);
-		
-		masked = ((uint8_t)firstLetter) & ((uint8_t)lastName[i]);
-		
-		for (j=7; j>=0; j--) {
-			bit = masked << (7-j);
-			bit = bit >> 7;
-			
-			char ch[3]; // 8 bit integers are at most 3 characters long in decimal form.
-			sprintf(ch, "%u", (int)bit);
-			write(1, " ", 1); write(1, ch, 1); write(1, " ", 1);
-		}
-	}
-	write(1, "\n", 1);
+	GOOD_STUFF( masked = ((uint8_t)firstLetter) & ((uint8_t)lastName[i]), masked )
 	
 	return 0;
 }
