@@ -72,13 +72,13 @@ late turn-ins.
 
 
 
-#include <stdio.h>
-#include <string.h>
+#include <stdio.h> // input/output functions.
+#include <string.h> // string functions
 #include <stdint.h> // provides constant width integers (cross-platform)
-#include <stdlib.h> // sprintf()
+#include <stdlib.h> // sprintf(),
 
 /*The use of a macro to eliminate some duplicate code.*/
-#define GOOD_STUFF(__maskDeclaration, __bitSetter) \
+#define __GOOD_STUFF(__maskDeclaration, __bitSetter) \
 	for (i=0; i<strlen(lastName); i++) { \
 		bit = 0; \
 		__maskDeclaration; \
@@ -93,6 +93,7 @@ late turn-ins.
 		} \
 	} \
 	write(1, "\n", 1);
+
 
 
 int main(void) {
@@ -113,13 +114,13 @@ int main(void) {
 	char firstLetter = lastName[0];
 	
 // PART 1 --------------------------------------------------
-	GOOD_STUFF( masked = 0, ((uint8_t)lastName[i]) )
+	__GOOD_STUFF( masked = 0, ((uint8_t)lastName[i]) )
 	
 // PART 2 --------------------------------------------------
-	GOOD_STUFF( masked = ((uint8_t)firstLetter) | ((uint8_t)lastName[i]), masked )
+	__GOOD_STUFF( masked = ((uint8_t)firstLetter) | ((uint8_t)lastName[i]), masked )
 	
 // PART 3 --------------------------------------------------
-	GOOD_STUFF( masked = ((uint8_t)firstLetter) & ((uint8_t)lastName[i]), masked )
+	__GOOD_STUFF( masked = ((uint8_t)firstLetter) & ((uint8_t)lastName[i]), masked )
 	
 	return 0;
 }
