@@ -11,8 +11,6 @@
 #include <signal.h> // to use SIGKILL
 
 #define MAX_ROUNDS 10
-#define MAX_CHILDREN 10
-#define MAX_SUM 100
 
 
 
@@ -20,10 +18,9 @@
 unsigned int numberOfChildren;
 unsigned int minFinalSum;
 unsigned int sum = 0;
-int* outgoingPipes[MAX_CHILDREN]; // array of pipes.
 
 
-void MyChild(int);
+void MyChild(int, int**);
 
 
 int main(int argc, char *args[]) {
@@ -44,6 +41,7 @@ int main(int argc, char *args[]) {
 	pid_t fork_pids[numberOfChildren]; // this is easier than declaring a global then using malloc or something.
 	pid_t wait_pid, exit_status;
 	int randNumber = 0;
+	int* outgoingPipes[numberOfChildren]; // array of pipes.
 	
 	/*
 	 * Create the three children processes.
@@ -64,7 +62,7 @@ int main(int argc, char *args[]) {
 			exit(4);
 		}
 		else if (fork_pids[i] == 0) { // 0 means child process.
-			MyChild(i);
+			MyChild(i, outgoingPipes);
 		}
 	}
 	
@@ -108,12 +106,12 @@ int main(int argc, char *args[]) {
 		return 0;
 }
 
-void MyChild(int i) {
+void MyChild(int i, int** pipes) {
 	int randNum = 0; // will receive from parent through pipe.
 	
 	while( sum < minFinalSum ) {
 		// get random number between 0 and 9 from pipe.
-		read( outgoingPipes[i][0], &randNum, sizeof(int) ); // waits for the parent to write to the pipe:
+		read( pipes[i][0], &randNum, sizeof(int) ); // waits for the parent to write to the pipe:
 		sum = sum + randNum; //increment sum by random number.
 		printf("Child #%u (PID %u) receives the number %i. Sum = %u\n", i, getpid(), randNum, sum); //display child proc id and current sum
 
