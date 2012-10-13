@@ -22,7 +22,7 @@ unsigned int minFinalSum;
 unsigned int sum = 0;
 
 
-void MyChild(int, int**);
+void MyChild(int, int*);
 
 
 int main(int argc, char *args[]) {
@@ -63,14 +63,12 @@ int main(int argc, char *args[]) {
 			printf("Error forking. \n"); // out of memory?
 			exit(4);
 		}
-		else if (fork_pids[i] == 0) { // 0 means child process.
+		else if (fork_pids[i] == 0) { // 0 means we're in the child process.
 			printf(" -- Child.\n");
-			MyChild(i, outgoingPipes);
+			MyChild( i, outgoingPipes[i] );
+/*			execl("./child", itoa(), );*/
 		}
-		else if (fork_pids[i] == 1) { // 1 means parent process.
-			printf(" -- Parent.\n");
-		}
-		else { // other?
+		else { // any other number means we're in the parent process.
 			printf(" -- Alien.\n");
 		}
 	}
@@ -124,12 +122,12 @@ int main(int argc, char *args[]) {
 		return 0;
 }
 
-void MyChild(int i, int** pipes) {
+void MyChild(int i, int* incomingPipe) {
 	int randNum = 0; // will receive from parent through pipe.
 	
 	while( sum < minFinalSum ) {
 		// get random number between 0 and 9 from pipe.
-		read( pipes[i][0], &randNum, sizeof(int) ); // waits for the parent to write to the pipe:
+		read( incomingPipe[0], &randNum, sizeof(int) ); // waits for the parent to write to the pipe:
 		sum = sum + randNum; //increment sum by random number.
 		printf("Child #%u (PID %u) receives the number %i. Sum = %u\n", i, getpid(), randNum, sum); //display child proc id and current sum
 
