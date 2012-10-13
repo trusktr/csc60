@@ -64,9 +64,26 @@ int main(int argc, char *args[]) {
 			exit(4);
 		}
 		else if (fork_pids[i] == 0) { // 0 means child process.
+			printf(" -- Child.\n");
 			MyChild(i, outgoingPipes);
 		}
+		else if (fork_pids[i] == 1) { // 1 means parent process.
+			printf(" -- Parent.\n");
+		}
+		else { // other?
+			printf(" -- Alien.\n");
+		}
 	}
+	
+	
+/*	for (i=0; i<0; i++) {*/
+/*		fork();*/
+/*	}*/
+/*	printf(" -- All.\n");*/
+/*	for (i=0; i<sizeof(fork_pids)/sizeof(pid_t); i++) {*/
+/*		printf(" ## %u\n", fork_pids[i]);*/
+/*	}*/
+/*	sleep(1);*/
 	
 	/*Let's initiate randomness based on the current time. */
 	srand( (unsigned int)time(NULL) );
@@ -82,12 +99,11 @@ int main(int argc, char *args[]) {
 			
 			printf("Parent sends child #%i the number %i.\n", j, randNumber);
 			
+			usleep(100000);
 			write( outgoingPipes[j][1], &randNumber, sizeof(int) );
 			
 			// bonus: read another pipe to get the current sum of the child, if the
 			// sum reaches the goal, set this child done, incr completion count
-			
-			usleep(1000);
 		}
 	}
 	
