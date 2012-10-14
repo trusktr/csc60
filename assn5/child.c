@@ -1,3 +1,6 @@
+/*
+ * Joe Pea -- Assignment 5 -- Weide Change
+ */
 
 
 #include <stdio.h>
