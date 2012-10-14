@@ -80,7 +80,7 @@ int main(int argc, char *args[]) {
 	}
 	
 	
-	printf(" -- We've got three children:\n");
+	printf(" -- We have %u children:\n", numberOfChildren);
 	for (i=0; i<sizeof(fork_pids)/sizeof(pid_t); i++) {
 		printf("   - PID# %u\n", fork_pids[i]);
 	}
