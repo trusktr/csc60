@@ -4,25 +4,16 @@
 
 
 
-#include <stdio.h> // input/output functions.
-/*#include <string.h> // string functions*/
+#include <stdio.h> // input/output functions: printf()
+/*#include <string.h> // string functions: strcpy() http://www.cplusplus.com/reference/clibrary/cstring/*/
 /*#include <stdint.h> // provides constant-width integers (cross-platform)*/
-#include <stdlib.h> // sprintf(),
+#include <stdlib.h> // sprintf(), exit(), malloc(), free()
 #include <time.h> // to get the time.
-#include <unistd.h> // usleep
+#include <unistd.h> // usleep(), 
 #include <signal.h> // to use SIGKILL
 
 #define MAX_ROUNDS 10
 
-
-
-// globals are usually not recommended, but this is just one-man quick practice...
-unsigned int numberOfChildren;
-unsigned int minFinalSum;
-unsigned int sum = 0;
-
-
-void MyChild(int, int);
 
 
 int main(int argc, char *args[]) {
@@ -32,8 +23,12 @@ int main(int argc, char *args[]) {
 		exit(1);
 	}
 
-	numberOfChildren = atoi(args[1]);
-	minFinalSum = atoi(args[2]);
+	unsigned int numberOfChildren = atoi(args[1]);
+	unsigned int minFinalSum = atoi(args[2]);
+	
+	char *minFinalSum_str;
+	char *outgoingPipe_str;
+	char *childNumber_str;
 	
 	if (numberOfChildren < 1 || minFinalSum < 1 || numberOfChildren > 10 || minFinalSum > 100) {
 		printf("Requirement: the arguments must be greater than 0. First arg no greater than 10. Second arg no greater than 100.\n");
@@ -64,24 +59,24 @@ int main(int argc, char *args[]) {
 			exit(4);
 		}
 		else if (fork_pids[i] == 0) { // 0 means we're in the child process.
-			printf(" -- Child.\n");
-			MyChild( i, outgoingPipes[i][0] );
-			execl("./child", itoa(i), itoa(outgoingPipes[i][0]), 0 );
+			sprintf(minFinalSum_str, "%u", minFinalSum);
+			sprintf(outgoingPipe_str, "%u", outgoingPipes[i][0]);
+			sprintf(childNumber_str, "%u", i);
+			execl("./child", childNumber_str, outgoingPipe_str, minFinalSum_str, 0 );
 		}
 		else { // any other number means we're in the parent process.
-			printf(" -- Alien.\n");
 		}
 	}
 	
 	
-/*	for (i=0; i<0; i++) {*/
-/*		fork();*/
-/*	}*/
-/*	printf(" -- All.\n");*/
-/*	for (i=0; i<sizeof(fork_pids)/sizeof(pid_t); i++) {*/
-/*		printf(" ## %u\n", fork_pids[i]);*/
-/*	}*/
-/*	sleep(1);*/
+	for (i=0; i<0; i++) {
+		fork();
+	}
+	printf(" -- All.\n");
+	for (i=0; i<sizeof(fork_pids)/sizeof(pid_t); i++) {
+		printf(" ## %u\n", fork_pids[i]);
+	}
+	sleep(1);
 	
 	/*Let's initiate randomness based on the current time. */
 	srand( (unsigned int)time(NULL) );
@@ -108,33 +103,20 @@ int main(int argc, char *args[]) {
 	/*
 	 * Wait for the children to exit.
 	 */
-		for (i=0; i<numberOfChildren; i++) {
-			wait_pid = wait( &exit_status );
-			if ( fork_pids[i] != wait_pid )
-				kill(fork_pids[i], SIGKILL);
-		}
-		
-		// exit code is only given 8-bit space, packed in 3rd byte
-		exit_status <<= 16; exit_status >>= 24;
-		printf("Parent here (PID %i) -- Child %i was the winner (sum == %i).\n", getpid(), wait_pid, exit_status );
-		
-		for (i=0; i<numberOfChildren; i++) free( outgoingPipes[i] );
-		return 0;
-}
-
-void MyChild(int i, int incomingPipeChannel) {
-	int randNum = 0; // will receive from parent through pipe.
-	
-	while( sum < minFinalSum ) {
-		// get random number between 0 and 9 from pipe.
-		read( incomingPipeChannel, &randNum, sizeof(int) ); // waits for the parent to write to the pipe:
-		sum = sum + randNum; //increment sum by random number.
-		printf("Child #%u (PID %u) receives the number %i. Sum = %u\n", i, getpid(), randNum, sum); //display child proc id and current sum
-
-		// bonus part: write current sum to another pipe (parent reads)
-		// can sleep for 1 second in bonus version
+	for (i=0; i<numberOfChildren; i++) {
+		wait_pid = wait( &exit_status );
+		if ( fork_pids[i] != wait_pid )
+			kill(fork_pids[i], SIGKILL);
 	}
-	exit(sum);
+	
+	// exit code is only given 8-bit space, packed in 3rd byte
+	exit_status <<= 16; exit_status >>= 24;
+	printf("Parent here (PID %i) -- Child %i was the winner (sum == %i).\n", getpid(), wait_pid, exit_status );
+	
+	for (i=0; i<numberOfChildren; i++)
+		free( outgoingPipes[i] );
+	
+	return 0;
 }
 
 
