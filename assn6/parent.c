@@ -1,3 +1,4 @@
+
 /*
  * Joe Pea -- Assignment 6 -- Weide Change
  */
@@ -15,45 +16,51 @@
 
 #define ping(x, y) kill(x, y)
 
-
+/*
+ * Global variables.
+ */
 unsigned int numberOfChildren;
 int complete_count = 0;
-pid_t *fork_pids_ptr;
-bool *completed_ptr;
-int **outgoingPipes_ptr;
+pid_t *fork_pids_ptr; // pointer to array of child PIDs.
+bool *completed_ptr; // pointer to array of booleans representing each child's completion.
+int **outgoingPipes_ptr; // pointer to array of pipes for sending a number to each child.
 
+/*
+ * Function prototypes.
+ */
+void sigChildHandler(); // handler for when a child exits and sends the SIGCHLD signal. Definition below.
 
-void sigChildHandler();
-
-
+/*
+ * Entry point.
+ */
 int main(int argc, char *args[]) {
 	
+	/*
+	 * Initialization for main()
+	 */
 	if (argc != 3 ) {
 		printf("Usage: %s arg1 arg2\n", args[0]);
 		exit(1);
 	}
-
-	int i,j,k,l; // counters
 	/*global*/ numberOfChildren = atoi(args[1]);
-	unsigned int minFinalSum = atoi(args[2]);
-	char minFinalSum_str[4];
-	char outgoingPipe_str[3];
-	int randNumber = 0;
-	
-	if (numberOfChildren < 1 || minFinalSum < 1 || numberOfChildren > 10 || minFinalSum > 100) {
+	unsigned int goalSum = atoi(args[2]);
+	char goalSum_str[4];
+	if (numberOfChildren < 1 || goalSum < 1 || numberOfChildren > 10 || goalSum > 100) {
 		printf("Requirement: the arguments must be greater than 0. First arg no greater than 10. Second arg no greater than 100.\n");
 		exit(2);
 	}
-	
-	pid_t fork_pids[numberOfChildren]; // this is easier than declaring a global then using malloc or something.
+	int i,j,k,l; // counters
+	int randNumber = 0;
+	pid_t fork_pids[numberOfChildren]; // Array of child PIDs whose size is numberOfChildren.
 	/*global*/ fork_pids_ptr = fork_pids;
 	int* outgoingPipes[numberOfChildren]; // array of outgoing pipes.
+	char outgoingPipe_str[3];
 	/*global*/ outgoingPipes_ptr = outgoingPipes;
 	bool completed[numberOfChildren]; for (i=0; i<numberOfChildren; i++) completed[i] = false;
 	/*global*/ completed_ptr = completed;
 	
 	/*
-	 * Create the three children processes.
+	 * Create the pipes for each child..
 	 */
 	for (i=0; i<numberOfChildren; i++) {
 		outgoingPipes[i] = (int*)malloc( sizeof(int) * 2 ); // make the pipes.
@@ -62,6 +69,10 @@ int main(int argc, char *args[]) {
 			exit(3);
 		}
 	}
+	
+	/*
+	 * Fork each child process.
+	 */
 	for (i=0; i<numberOfChildren; i++) { // fork the children
 		fork_pids[i] = fork();
 		
@@ -70,39 +81,56 @@ int main(int argc, char *args[]) {
 			exit(4);
 		}
 		else if (fork_pids[i] == 0) { // 0 means we're in the child process.
-			sprintf(minFinalSum_str, "%u", minFinalSum);
+			sprintf(goalSum_str, "%u", goalSum);
 			sprintf(outgoingPipe_str, "%u", outgoingPipes[i][0]);
-			execl("./child", outgoingPipe_str, minFinalSum_str, 0 );
+			
+			/*
+			 * Use execl() to make each fork replace itself with an new process: "./child"
+			 */
+			execl("./child", outgoingPipe_str, goalSum_str, 0 );
 		}
 	}
 	
-	
-	printf(" -- We have %u children:\n", numberOfChildren);
-	for (i=0; i<sizeof(fork_pids)/sizeof(pid_t); i++) {
-		printf("   - PID# %u\n", fork_pids[i]);
-	}
-	printf(" \n");
+	/*
+	 * Register sigChildHandler() as the handler for the SIGCHLD signal.
+	 */
+	signal(SIGCHLD, sigChildHandler);
 	sleep(1);
 	
-	signal(SIGCHLD, sigChildHandler);
 	
-	
-	/*Let's initiate randomness based on the current time. */
+	/*
+	 * Let's initiate some randomness based on the current time.
+	 */
 	srand( (unsigned int)time(NULL) );
 	
+	/*
+	 * The main loop for sending numbers to each child.
+	 */
 	while (true) {
-		for (j=0; j<numberOfChildren; j++) {
-			// bonus: skip this child if already done
+		for (j=0; j<numberOfChildren; j++) { // for each child.
+			
+			/* 
+			 * BONUS: skip this child if it has already exited.
+			 */
 			if (completed[j] == true) continue;
 			
-			/* Seed random randomly to be more random */
-			for (k=0; k<rand()%100+50; k++) srand( rand() );
-			randNumber = rand() % 10;
-			
 			usleep(100000);
-			write( outgoingPipes[j][1], &randNumber, sizeof(int) );
-			printf("Parent sent child #%i (PID %u) the number %i.\n", j, fork_pids[j], randNumber);
 			
+			/*
+			 * Seed random randomly to be more random.
+			 */
+			for (k=0; k<rand()%100+50; k++) srand( rand() );
+			
+			/*
+			 * Send a random number to this child.
+			 */
+			randNumber = rand() % 10;
+			write( outgoingPipes[j][1], &randNumber, sizeof(int) );
+			printf("Parent here, sent child #%i (PID %u) the number %i.\n", j, fork_pids[j], randNumber);
+			
+			/*
+			 * Signal the child to read the given number.
+			 */
 			ping(fork_pids[j], SIGINT);
 		}
 	}
@@ -110,26 +138,37 @@ int main(int argc, char *args[]) {
 	return 0;
 }
 
-
+/*
+ * The handler for the SIGCHLD signal.
+ */
 void sigChildHandler() {
-	// Handle SIGCHLD.
-	pid_t wait_pid, exit_status; int l,i;
+	pid_t wait_pid, exit_status;
 	static int complete_count = 0;
+	int l,i; // counters
+	
 	
 	wait_pid = wait( &exit_status );
-	
-	// exit code is only given 8-bit space, packed in 3rd byte
-	exit_status <<= 16; exit_status >>= 24;
+	exit_status <<= 16; exit_status >>= 24;	// exit code is only given 8-bit space, packed in 3rd byte
 	
 	for (l=0; l<numberOfChildren; l++) {
 		if (fork_pids_ptr[l] == wait_pid) {
+			/*
+			 * BONUS: The child's PID and its sum is shown at the moment of its exit.
+			 */
 			printf("Parent here, Child #%u (PID %u) exited with a sum of %u. \n", l, wait_pid, exit_status );
+			
+			/*
+			 * Keep track of child completion.
+			 */
 			completed_ptr[l] = true;
 			complete_count++;
+			
+			free( outgoingPipes_ptr[l] ); // free the memory for the now unused pipe.
+			
+			/*
+			 * BONUS: Exit only when all children have finished and exited.
+			 */
 			if (complete_count == numberOfChildren) {
-				for (i=0; i<numberOfChildren; i++) {
-					free( outgoingPipes_ptr[i] );
-				}
 				exit(0);
 			}
 			break;
