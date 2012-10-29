@@ -1,6 +1,6 @@
 
 /*
- * Joe Pea -- Assignment 7 -- Weide Change
+ * Joe Pea -- Assignment 7 -- Weide Chang
  */
 
 #include "common.h"
