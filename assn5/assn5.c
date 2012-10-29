@@ -7,7 +7,7 @@
 /*#include <stdint.h> // provides constant-width integers (cross-platform)*/
 #include <stdlib.h> // sprintf(),
 #include <time.h> // to get the time.
-#include <unistd.h> // usleep
+#include <unistd.h> // usleep, fork, pipe, read, write, execl, getpid
 #include <signal.h> // to use SIGKILL
 
 #define MAX_ROUNDS 10

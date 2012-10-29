@@ -16,6 +16,7 @@
  */
 int incomingPipeChannel;
 int goalSum;
+bool startWaitingAgain = true; // just a flag to print the waiting message only once while waiting for parent.
 
 
 /*
@@ -52,8 +53,13 @@ int main(int argc, char *args[]) {
 	 * Loop endlessly while waiting for a signals from the parent.
 	 */
 	while( true ) {
-		printf("Child here (PID %u), waiting for signal... \n", getpid());
-		usleep(1000000);
+		if (startWaitingAgain) {
+			write(fileno(stdout), "\n", 1);
+			printf("Child here (PID %u), waiting for signal...", getpid()); fflush(stdout);
+			startWaitingAgain = false;
+		}
+		printf("."); fflush(stdout);
+		usleep(100000);
 	}
 }
 
@@ -77,6 +83,8 @@ void sigIntHandler() {
 	if (sum >= goalSum) {
 		exit(sum);
 	}
+	
+	startWaitingAgain = true;
 }
 
 
