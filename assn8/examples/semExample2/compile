@@ -1,0 +1,3 @@
+#!/bin/bash
+gcc -lpthread main.c
+chmod 755 a.out

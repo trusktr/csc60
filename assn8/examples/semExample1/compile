@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# this compiles
+gcc -lpthread proc0.c -o proc0
+gcc -lpthread proc1.c -o proc1
+
+# chmod for world to run
+chmod 755 proc0 proc1
+
+# to run: proc0 <sem key>

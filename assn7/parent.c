@@ -69,8 +69,8 @@ int main(int argc, char *args[]) {
 	 * Fork each child process.
 	 */
 	for (i=0; i<numberOfChildren; i++) { // fork the children
-		fork_pids[i] = 2;
 		fork_pids[i] = fork();
+/*		fork_pids[i] = 2;*/
 /*		printf(" -- test\n");*/
 		
 		if (fork_pids[i] == -1) { // -1 means error forking.
