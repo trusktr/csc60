@@ -9,8 +9,8 @@
 #ifndef __COMMON_H__
 	#define __COMMON_H__
 
-	#define MAX_ROW  4  // game space height
-	#define MAX_COL  8  // game space width
+	#define MAX_ROW  8  // game space height
+	#define MAX_COL  16  // game space width
 	#define USEC 100000 // minimum .1 sec sleep
 
 	#include <stdio.h>
