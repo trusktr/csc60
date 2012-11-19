@@ -6,8 +6,7 @@
 char debug[200];
 
 // when child has reached and exits, parent can do these things:
-void ChildExit()
-{
+void ChildExit() {
    static int place = 0;    // count 1st place, 2nd place, etc. (static var)
    char symbol, str[20];
    int pid, exit_code;
@@ -21,8 +20,7 @@ system(debug);
    place++;                           // upcount next winner's place
    printf( "%d-%c ", place, symbol ); // printf buffers this until later (below)
 
-   if( place == 26 ) // all 26 letters have finished, we end
-   {
+   if( place == 26 ) { // all 26 letters have finished, we end
       Flash();                          // flash screen
       sprintf( str, "\033[28;1H", 27 ); // put cursor low, on row 28, col 1
       write( 1, str, strlen(str) );     // make it happen
@@ -31,8 +29,7 @@ system(debug);
    }
 }
 
-int main()
-{
+int main() {
    char symbol, str[30]; // each child's letter symbol, a general-purposed str
    sem_t *sem;           // the video semaphore that the parent needs to open
 
@@ -40,18 +37,15 @@ int main()
 
    sprintf( str, "%u", getpid() ); // use my pid as key str to open a semaphore
    sem = sem_open( str, O_CREAT, S_IRWXU, 1 ); // a mutex type for video access
-   if( sem == SEM_FAILED )
-   {
+   if( sem == SEM_FAILED ) {
       perror("Error making semaphore: ");
       return 0;
    }
 
    InitScr( sem );
 
-   for( symbol='A'; symbol<='Z'; symbol++ ) // symbol goes thru 'A' to 'Z'
-   {
-      switch( fork() ) // fork 26 children
-      {
+   for( symbol='A'; symbol<='Z'; symbol++ ) {// symbol goes thru 'A' to 'Z'
+      switch( fork() ) { // fork 26 children
          case -1: perror("Unable to fork child: "); return; // something went wrong
          case 0:                          // child process here
             sprintf( str, "%c", symbol ); // give child its symbol knowledge

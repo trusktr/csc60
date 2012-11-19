@@ -8,7 +8,7 @@ int main(int argc, char *argv[]) // need to know the letter symbol
    char symbol, str[20];
    sem_t *sem;
    int i, row;
-  
+
    symbol = argv[1][0];
    row = (int)symbol - 64;     // use symbol to set row to 1 for 'A', 2 'B', 3 'C', etc.
 
