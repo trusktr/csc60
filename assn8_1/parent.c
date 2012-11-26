@@ -49,9 +49,9 @@ void main() { // no need of given args, use self pid as semaphore key
    char str[100];                     // str for common usage
    char row_str[3], col_str[3], pipe_str[3], symbol_str[3]; // child's argv
 
-system("echo ------------------------- > /dev/pts/5");
-sprintf(str, "%s%u%s", "echo '-- debug parent -- PID: ", getpid(), "'  > /dev/pts/5");
-system(str);
+// system("echo ------------------------- > /dev/pts/5");
+// sprintf(str, "%s%u%s", "echo '-- debug parent -- PID: ", getpid(), "'  > /dev/pts/5");
+// system(str);
 
 // prep video semaphore, start value 1, make it like a mutex
    sprintf( str, "%u", getpid() );        // build key str out of pid
@@ -118,14 +118,14 @@ system(str);
    int loopCount = 0;
    while(1) //  let them play forever
    {
-   
-sprintf(str, "%s%u%s", "echo '-- debug parent -- while iteration ", loopCount, ", position 1' > /dev/pts/5");
-system(str);
+
+// sprintf(str, "%s%u%s", "echo '-- debug parent -- while iteration ", loopCount, ", position 1' > /dev/pts/5");
+// system(str);
       sem_post( sem_c ); // allow Chaser 1 play move (loop once, see child.c)
 
       read( the_pipe[0], &c_row, sizeof(int) ); // read pos info row from Chaser
-sprintf(str, "%s%u%s", "echo '-- debug parent -- while iteration ", loopCount, ", position 2' > /dev/pts/5");
-system(str);
+// sprintf(str, "%s%u%s", "echo '-- debug parent -- while iteration ", loopCount, ", position 2' > /dev/pts/5");
+// system(str);
       read( the_pipe[0], &c_col, sizeof(int) ); // read pos info col from Chaser
 
       if(c_row == r_row && c_col == r_col) break; // collision occurred?
