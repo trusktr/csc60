@@ -51,9 +51,10 @@ void main(int argc, char *argv[])
    {
       len_recv = recv( my_session, &shmid, sizeof(int), 0 );
       printf("Using recv(), shmid received is %d, len_recv is %d\n", shmid, len_recv);
+      printf("RECEIVE WHILE LOOP\n");
    }
    
-   printf("DONE RECEVING......");
+   printf("DONE RECEVING......\n");
 
 
 
