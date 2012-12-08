@@ -128,8 +128,6 @@ void main()
    fflush(stdout);
    
    session = accept( my_sock_desc, (struct sockaddr *)&client_sock_addr, &sock_size );
-   
-   printf("blah blah blah \n");
 
 // get info of client IP and Port # (ntoa - get IP, ntoh - get port #)
    printf( "   Got client from IP %s, Port %d...\n", inet_ntoa( client_sock_addr.sin_addr ), ntohs( client_sock_addr.sin_port ) );
@@ -143,6 +141,8 @@ void main()
 		send( session, &shmid4client, sizeof(int), 0 );
 		sleep(1);
 	}
+	
+	printf("DONE SENDING shmid........");
     
     
     
