@@ -46,13 +46,13 @@ void main(int argc, char *argv[])
    /*
     * RECEIVE shmid FROM SERVER...
     */
-   len_recv = 1;
-   while( len_recv != 0 ) // indicates socket connection closed
-   {
+   //len_recv = 1;
+   //while( len_recv != 0 ) // indicates socket connection closed
+   //{
       len_recv = recv( my_session, &shmid, sizeof(int), 0 );
       printf("Using recv(), shmid received is %d, len_recv is %d\n", shmid, len_recv);
       printf("RECEIVE WHILE LOOP\n");
-   }
+   //}
    
    printf("DONE RECEVING......\n");
 
