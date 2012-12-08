@@ -52,7 +52,8 @@ void main(int argc, char *argv[])
       len_recv = recv( my_session, &shmid, sizeof(int), 0 );
       printf("Using recv(), shmid received is %d, len_recv is %d\n", shmid, len_recv);
    }
-   sleep(10);
+   
+   printf("DONE RECEVING......");
 
 
 

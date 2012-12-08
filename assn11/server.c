@@ -140,9 +140,11 @@ void main()
 		printf( "Sending shmid4client %d\n", shmid4client );
 		send( session, &shmid4client, sizeof(int), 0 );
 		sleep(1);
+		
+		printf("SEND FOR LOOP");
 	}
 	
-	printf("DONE SENDING shmid........");
+	printf("DONE SENDING........");
     
     
     
