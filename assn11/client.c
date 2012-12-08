@@ -15,7 +15,50 @@ void main(int argc, char *argv[])
    int *points;              // for keypoll
    int i;
 
-   shmid = atoi( argv[1] );
+   //shmid = atoi( argv[1] ); // RECEIVE THROUGH SOCKET FROM SERVER INSTEAD
+   
+   
+   
+   
+   
+   
+   /*
+    * SET UP SOCKET STUFF
+    */
+   int num, my_session, len_recv;
+
+   struct sockaddr_in my_server_sock_addr;
+   struct hostent *my_server;
+
+   my_session = socket( AF_INET, SOCK_STREAM, 0 ); // get descriptor
+   my_server = gethostbyname( SERVER_IP );         // get entry by IP
+
+// prep my_sock_addr
+   memcpy( &my_server_sock_addr.sin_addr.s_addr, my_server->h_addr, my_server->h_length );
+   my_server_sock_addr.sin_family = AF_INET;
+   my_server_sock_addr.sin_port = htons( PORT_NUM );
+
+// connect service described in my_server_sock_addr -> enable my_session
+   if( connect( my_session, (struct sockaddr *)&my_server_sock_addr, sizeof(struct sockaddr) ) < 0 )
+   { perror( "connect" ); return; }
+   
+   
+   /*
+    * RECEIVE shmid FROM SERVER...
+    */
+   len_recv = 1;
+   while( len_recv != 0 ) // indicates socket connection closed
+   {
+      len_recv = recv( my_session, &shmid, sizeof(int), 0 );
+      printf("Using recv(), shmid received is %d, len_recv is %d\n", shmid, len_recv);
+   }
+   sleep(10);
+
+
+
+
+
+
 
 // attach shared memory segment to local data
    if( ( p = shmat( shmid, 0, 0 ) ) == (char *) -1 )
@@ -100,6 +143,8 @@ void main(int argc, char *argv[])
 // shared mem requested via shmids[]
    sprintf(str, "%d", getpid());   // use pid as key
    sem_unlink( str );              // close sem_video
+
+   close( my_session );
 
 } // end main
 

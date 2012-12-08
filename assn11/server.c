@@ -14,6 +14,62 @@ void main()
    char *pick;               // cols4client[26] represents this
    int *points;              // cols4client[27] represents this
    int i;
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   /*
+    * SET UP SOCKET STUFF
+    */
+   int true, sock_size, my_sock_desc, session;        // socket use
+   struct sockaddr_in my_sock_addr, client_sock_addr; // socket use
+   int num = 0;            // counter
+
+// open/request socket like asking for descriptor from OS
+   if ( -1 == ( my_sock_desc = socket( AF_INET, SOCK_STREAM, 0 ) ) )
+   { perror("socket"); return; }
+
+// set socket option: addr, port, etc.
+   if( -1 == setsockopt( my_sock_desc, SOL_SOCKET, SO_REUSEADDR, &true, sizeof( int ) ) )
+   { perror("setsockopt"); return; }
+
+   my_sock_addr.sin_family = AF_INET;          // Internet AF type socket
+   my_sock_addr.sin_port = htons( PORT_NUM );  // Host TO Network Service (htons)
+   my_sock_addr.sin_addr.s_addr = INADDR_ANY;  // Internet address as server addr
+   bzero( &my_sock_addr.sin_zero, 8 );  // 8 bytes or sizeof(my_sock_addr.sin_zero)
+
+// bind server socket to Internet addr
+   if ( -1 == bind( my_sock_desc, (struct sockaddr *)&my_sock_addr, sizeof(struct sockaddr) ) )
+   { perror("bind"); return; }
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
 
    sprintf(str, "%d", getpid());
    sem_video = sem_open( str, O_CREAT, 0600, 1 ); // mutex type
@@ -52,9 +108,47 @@ void main()
    points = &cols4client[27];       // are used for bidding/scoring
    *pick = *points = 0;             // not picked and no points won
 
-   printf( "\nFrom another shell, run client and pick winner: './client %d' ",
-           shmid4client );
+   
+   
+   
+   
+   
+   
+	/*
+	 * LISTEN FOR CLIENTS (ONLY ONE FOR NOW) TO SEND THEM THEIR OWN shmid4client.
+	 */
+   if ( -1 == listen( my_sock_desc, 5 ) )
+   { perror("listen"); return; }
+
+// listen blocks (awaiting/accepting client to open connection session)
+   printf( "   Listening on port %d...\n", PORT_NUM );
+   sock_size = sizeof( struct sockaddr_in ); // Internet socket type
+   
+   printf( "\nFrom another shell, run client and pick winner: './client' "/*, PORT_NUM*/ ); // No arguments, PORT_NUM is constant in common.h
    fflush(stdout);
+   
+   session = accept( my_sock_desc, (struct sockaddr *)&client_sock_addr, &sock_size );
+   
+   printf("blah blah blah \n");
+
+// get info of client IP and Port # (ntoa - get IP, ntoh - get port #)
+   printf( "   Got client from IP %s, Port %d...\n", inet_ntoa( client_sock_addr.sin_addr ), ntohs( client_sock_addr.sin_port ) );
+      
+   /*
+    * SEND shmid4client TO CLIENTS (ONLY ONE FOR NOW)
+    */
+	for( num = 0; num < 1; num++ )
+	{
+		printf( "Sending shmid4client %d\n", shmid4client );
+		send( session, &shmid4client, sizeof(int), 0 );
+		sleep(1);
+	}
+    
+    
+    
+      
+      
+      
 
    while( (int)*pick == 0 ) usleep(500000); // .5 sec check-wait loop
 
@@ -126,6 +220,9 @@ void main()
    for( i=0; i<26; i++ ) shmctl( shmids[i], IPC_RMID, 0 );
 
    shmctl( shmid4client, IPC_RMID, 0 );
+
+   sleep(1);
+   close( session ); // close connection session with remote client
 
 } // end main
 

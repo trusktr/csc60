@@ -40,8 +40,7 @@ void main()
                      &sock_size );
 
 // get info of client IP and Port # (ntoa - get IP, ntoh - get port #)
-   printf( "   Got client from IP %s, Port %d...\n",
-      inet_ntoa( client_sock_addr.sin_addr ), ntohs( client_sock_addr.sin_port ) );
+   printf( "   Got client from IP %s, Port %d...\n", inet_ntoa( client_sock_addr.sin_addr ), ntohs( client_sock_addr.sin_port ) );
 
 // here we test sending 10 numbers to see if client can sync to it
    for( num = 0; num < 10; num++ )
