@@ -151,7 +151,10 @@ void main()
       
       
 
-   while( (int)*pick == 0 ) usleep(500000); // .5 sec check-wait loop
+	while( (int)*pick == 0 ) {
+		usleep(500000); // .5 sec check-wait loop
+		printf("Waiting for client to pick...\n");
+	}
 
 	// QUESTION: How do we know that, from the above line to the below line, the client isn't done setting *pick in memory?
 
