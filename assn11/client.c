@@ -13,15 +13,16 @@ void main(int argc, char *argv[])
    int pid, exit_code;       // for keypoll
    char *pick;               // for keypoll
    int *points;              // for keypoll
+   int id;
    int i;
 
    //shmid = atoi( argv[1] ); // RECEIVE THROUGH SOCKET FROM SERVER INSTEAD
-   
-   
-   
-   
-   
-   
+
+
+
+
+
+
    /*
     * SET UP SOCKET STUFF
     */
@@ -41,19 +42,20 @@ void main(int argc, char *argv[])
 // connect service described in my_server_sock_addr -> enable my_session
    if( connect( my_session, (struct sockaddr *)&my_server_sock_addr, sizeof(struct sockaddr) ) < 0 )
    { perror( "connect" ); return; }
-   
-   
+
+
    /*
     * RECEIVE shmid FROM SERVER...
     */
    //len_recv = 1;
    //while( len_recv != 0 ) // indicates socket connection closed
    //{
+      len_recv = recv( my_session, &id, sizeof(int), 0 );
+      printf("Using recv(), id received is %d, len_recv is %d\n", id, len_recv);
       len_recv = recv( my_session, &shmid, sizeof(int), 0 );
       printf("Using recv(), shmid received is %d, len_recv is %d\n", shmid, len_recv);
-      printf("RECEIVE WHILE LOOP\n");
    //}
-   
+
    printf("DONE RECEVING......\n");
 
 
@@ -67,8 +69,8 @@ void main(int argc, char *argv[])
    { perror( "shmat: " ); return; }
 
    cols = (int *)p;
-   pick = (char *)&cols[26];         // 27th for pick feedback
-   points = &cols[27];               // 28th for getting points
+   pick = (char *)&cols[26+(2*id)];         // 27th+(2*id) for pick feedback
+   points = &cols[27+(2*id)];               // 28th+(2*id) for getting points
 
    sprintf(str, "%d", getpid());
    sem_video = sem_open( str, O_CREAT, 0600, 1 ); // mutex type
@@ -99,9 +101,9 @@ void main(int argc, char *argv[])
    for( i=0; i<26; i++ ) olds[i] = 0; // not set
 
    count = 0;
-   
+
    // QUESTION: Is this loop randomly concurrent with the while loop in ./server.c?
-   
+
    while( count < 26 ) // loop until all accounted for
    {
       for( i=0; i<26; i++ ) // check all proc status

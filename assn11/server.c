@@ -176,9 +176,10 @@ void main()
     */
 	for( num = 0; num < sessionCount; num++ )
 	{
-		printf( "Sending shmid4client to clients: %d\n", shmid4client );
+		printf( "Sending client id to client #%i: %i\n", num, num );
+		send( sessions[num], &num, sizeof(int), 0 );
+		printf( "Sending shmid4client to client #%i: %d\n", num, shmid4client );
 		send( sessions[num], &shmid4client, sizeof(int), 0 );
-		printf("SEND FOR LOOP\n");
 		sleep(1);
 	}
 
@@ -198,7 +199,7 @@ void main()
 		}
 
 		// QUESTION: How do we know that, from the above line to the below line, the client isn't done setting *pick in memory?
-		printf( "\n   >>>>> Client #%i picked %c <<<<< ", *pick[i], i );
+		printf( "\n   >>>>> Client #%i picked %c <<<<< ", i, *pick[i] );
 		fflush(stdout);
 	}
 	sleep(2);
