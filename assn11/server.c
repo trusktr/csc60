@@ -32,8 +32,8 @@ void main()
 	info_t *infos[26];        // 26 ptrs to info of each alphabet
 	int finished, places[26];    // count how many done, their places
 	int *cols4client, shmid4client; // for player to view 26 col #'s
-	char* pick[100];               // cols4client[26+(2n)] represents this
-	int* points[100];              // cols4client[27+(2n)] represents this
+	char* pick[MAX_CLIENTS];               // cols4client[26+(2n)] represents this
+	int* points[MAX_CLIENTS];              // cols4client[27+(2n)] represents this
 	int i, j; //counters
 
 
@@ -53,7 +53,7 @@ void main()
    /*
     * SET UP SOCKET STUFF
     */
-   int true, sock_size, my_sock_desc, sessions[100], sessionCount = 0;        // socket use
+   int true, sock_size, my_sock_desc, sessions[MAX_CLIENTS], sessionCount = 0;        // socket use
    struct sockaddr_in my_sock_addr, client_sock_addr; // socket use
    int num = 0;            // counter
 
@@ -111,8 +111,8 @@ void main()
       infos[i]->row = i+1;
    }
 
-// for player client, 26 cols + 100 picks + 100 points
-   if( ( shmid4client = shmget( getpid()+1, sizeof(int[26+(100*2)]), IPC_CREAT | 0600 ) ) < 0 )
+// for player client, 26 cols + MAX_CLIENTS picks + MAX_CLIENTS points
+   if( ( shmid4client = shmget( getpid()+1, sizeof(int[26+(MAX_CLIENTS*2)]), IPC_CREAT | 0600 ) ) < 0 )
    { perror( "shmget #2: " ); return; }
 
 // attach shared memory segment to local data
@@ -125,7 +125,7 @@ void main()
    // I'm wondering because in ./client.c we assume that items cols[] are all zero in order to compare to olds[].
 
 // let client pick winner
-	for (i=0; i<100; i++) {
+	for (i=0; i<MAX_CLIENTS; i++) {
 		pick[i] = (char *)&cols4client[26+(2*i)];	// last 2 allocated int spaces
 		points[i] = &cols4client[27+(2*i)];			// are used for bidding/scoring
 		*pick[i] = *points[i] = 0;					// not picked and no points won
@@ -191,7 +191,7 @@ void main()
 
 
 	printf( "\n" );
-	for (i=0; i<100; i++) {
+	for (i=0; i<MAX_CLIENTS; i++) {
 		while( (int)*pick[i] == 0 ) {
 			usleep(500000); // .5 sec check-wait loop
 			printf("Waiting for client %i to pick...\n", i);
@@ -245,7 +245,7 @@ void main()
             sem_post(sem_video);
 
 // check if client's pick wins
-            for (j=0; j<100; j++) {
+            for (j=0; j<MAX_CLIENTS; j++) {
 	            if ( 'A'+i == *pick[j] ) *points[j] = 5 - finished + 1;
 	        }
 
@@ -256,7 +256,7 @@ void main()
    sleep(1); // don't flashing right away
    Flash();  // will also move cursor below things (to end cleanly)
 
-	for (j=0; j<100; j++) {
+	for (j=0; j<MAX_CLIENTS; j++) {
 		if( *points[j] > 0 ) printf( "Client #%i: You've won %d points!\n", j, *points[j] );
 		else printf( "Client #%i: Better luck next time!\n ", j);
 	}

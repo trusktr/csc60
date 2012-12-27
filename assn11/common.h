@@ -9,8 +9,8 @@
 
 #define MAX_COL  40    // # of columns across
 #define USEC  50000    // usleep(USEC), # of microsec sleep
-#define MAX_CLIENTS 100;
-#define CONNECTION_TIME 10;
+#define MAX_CLIENTS 100
+#define CONNECTION_TIME 10
 
 #include <stdio.h>
 #include <stdlib.h>
