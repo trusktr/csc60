@@ -192,7 +192,7 @@ void main()
 
 
 	printf( "\n" );
-	for (i=0; i<MAX_CLIENTS; i++) {
+	for (i=0; i<sessionCount; i++) {
 		while( (int)*pick[i] == 0 ) {
 			usleep(500000); // .5 sec check-wait loop
 			printf("Waiting for client %i to pick...\n", i);
