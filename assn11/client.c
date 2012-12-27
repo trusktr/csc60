@@ -37,7 +37,7 @@ void main(int argc, char *argv[])
 // prep my_sock_addr
    memcpy( &my_server_sock_addr.sin_addr.s_addr, my_server->h_addr, my_server->h_length );
    my_server_sock_addr.sin_family = AF_INET;
-   my_server_sock_addr.sin_port = htons( PORT_NUM );
+   my_server_sock_addr.sin_port = htons( LOCAL_PORT_NUM );
 
 // connect service described in my_server_sock_addr -> enable my_session
    if( connect( my_session, (struct sockaddr *)&my_server_sock_addr, sizeof(struct sockaddr) ) < 0 )

@@ -1,5 +1,10 @@
 // server.c
-// AlphaDerby - Shared Memory (TwoTermsPick)
+// AlphaDerby
+/*
+Launch ./server, then launch ./client from anywhere, in as many terminals as you want.
+The user at each terminal will play the game by picking a letter then watching the
+alphaderby race.
+*/
 
 #include "common.h"
 
@@ -66,7 +71,7 @@ void main()
    { perror("setsockopt"); return; }
 
    my_sock_addr.sin_family = AF_INET;          // Internet AF type socket
-   my_sock_addr.sin_port = htons( PORT_NUM );  // Host TO Network Service (htons)
+   my_sock_addr.sin_port = htons( LOCAL_PORT_NUM );  // Host TO Network Service (htons)
    my_sock_addr.sin_addr.s_addr = INADDR_ANY;  // Internet address as server addr
    bzero( &my_sock_addr.sin_zero, 8 );  // 8 bytes or sizeof(my_sock_addr.sin_zero)
 
@@ -137,6 +142,29 @@ void main()
 
 
 
+
+
+
+
+	/*
+	 * FORK THE SERVER HELPER THAT WILL EMULATE LOCAL CLIENT CONNECTIONS TO THE SERVER
+	 */
+	switch( fork() )
+	{
+		case -1: perror("fork"); return;
+		case 0:
+			sprintf( str, "%d", shmids[i] );
+			execl( "./helper", "./helper", str, 0 ); return;
+	}
+
+
+
+
+
+
+
+
+
 	/*
 	 * LISTEN FOR CLIENTS TO SEND THEM THEIR OWN shmid4client.
 	 */
@@ -144,7 +172,7 @@ void main()
    { perror("listen"); return; }
 
 // listen blocks (awaiting/accepting client to open connection sessions)
-   printf( "   Listening on port %d...\n", PORT_NUM );
+   printf( "   Listening on port %d...\n", LOCAL_PORT_NUM );
    sock_size = sizeof( struct sockaddr_in ); // Internet socket type
 
 	/*
@@ -158,7 +186,7 @@ void main()
 	forTheThread.pSock_size = &sock_size;
 	pthread_t pthConnectionListener;
 	pthread_create(&pthConnectionListener, NULL, acceptConnections, (void*)&forTheThread);
-	printf( "\nFrom other shells, run clients and pick a letter: './client' "/*, PORT_NUM*/ ); // No arguments, PORT_NUM is constant in common.h
+	printf( "\nFrom other shells, run clients and pick a letter: './client' "/*, LOCAL_PORT_NUM*/ ); // No arguments, LOCAL_PORT_NUM is constant in common.h
 	fflush(stdout);
 	unsigned int currentTime = (unsigned int)time(NULL);
 	while ( (unsigned int)time(NULL) - currentTime < CONNECTION_TIME ) {
