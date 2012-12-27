@@ -100,11 +100,11 @@ void main()
    {
 // request/allocate shared memory, size is one info_t
       if( ( shmids[i] = shmget( getpid()+'A'+i, sizeof(info_t), IPC_CREAT | 0600 ) ) < 0 )
-      { perror( "shmget: " ); return; }
+      { perror( "shmget #1" ); return; }
 
 // attach shared memory segment to local data
       if( ( p = shmat( shmids[i], 0, 0 ) ) == (char *) -1 )
-      { perror( "shmat: " ); return; }
+      { perror( "shmat #1" ); return; }
 
       infos[i] = (info_t *)p;
       infos[i]->symbol = 'A'+i; // prep info_t for alphabet
@@ -113,11 +113,11 @@ void main()
 
 // for player client, 26 cols + MAX_CLIENTS picks + MAX_CLIENTS points
    if( ( shmid4client = shmget( getpid()+1, sizeof(int[26+(MAX_CLIENTS*2)]), IPC_CREAT | 0600 ) ) < 0 )
-   { perror( "shmget #2: " ); return; }
+   { perror( "shmget #2" ); return; }
 
 // attach shared memory segment to local data
    if( ( p = shmat( shmid4client, 0, 0 ) ) == (char *) -1 )
-   { perror( "shmat: " ); return; }
+   { perror( "shmat #2" ); return; }
 
    cols4client = (int *)p; // an array of int, 26 col #'s // size: 28
 
