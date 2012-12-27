@@ -246,7 +246,7 @@ void main()
             sem_post(sem_video);
 
 // check if client's pick wins
-            for (j=0; j<MAX_CLIENTS; j++) {
+            for (j=0; j<sessionCount; j++) {
 	            if ( 'A'+i == *pick[j] ) *points[j] = 5 - finished + 1;
 	        }
 
@@ -257,7 +257,7 @@ void main()
    sleep(1); // don't flashing right away
    Flash();  // will also move cursor below things (to end cleanly)
 
-	for (j=0; j<MAX_CLIENTS; j++) {
+	for (j=0; j<sessionCount; j++) {
 		if( *points[j] > 0 ) printf( "Client #%i: You've won %d points!\n", j, *points[j] );
 		else printf( "Client #%i: Better luck next time!\n ", j);
 	}
